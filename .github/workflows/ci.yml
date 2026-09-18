@@ -1,0 +1,132 @@
+name: CI Release and Deploy
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-desktop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup C3 Compiler
+        uses: ManuLinares/setup-c3@v1
+        with:
+          version: nightly
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libx11-dev \
+            libxrandr-dev \
+            libxinerama-dev \
+            libxi-dev \
+            libxcursor-dev \
+            libgl1-mesa-dev
+
+      - name: Create dist directory
+        run: mkdir -p dist_release
+
+      # 1. Linux
+      - name: Build & Package Linux
+        run: |
+          c3c build phoenix --target linux-x64 -O3 -g0
+          strip build/phoenix
+          zip -9 -j dist_release/phoenix-linux-x64.zip build/phoenix
+          rm -f build/phoenix
+
+      # 2. Windows
+      - name: Build & Package Windows
+        run: |
+          c3c fetch-sdk windows --accept-license
+          c3c build phoenix --target windows-x64 -O3 -g0
+          zip -9 -j dist_release/phoenix-windows-x64.zip build/phoenix.exe
+          rm -f build/phoenix.exe
+
+      # 3. macOS
+      - name: Build & Package macOS
+        run: |
+          c3c fetch-sdk macos --accept-license
+          c3c build phoenix --target macos-aarch64 -O3 -g0
+          zip -9 -j dist_release/phoenix-macos-aarch64.zip build/phoenix
+          rm -f build/phoenix
+
+      # 4. Upload Artifacts
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: phoenix-binaries
+          path: dist_release/
+
+      # 5. Publish Release on Tag
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            dist_release/*.zip \
+            --title "Dungeon of the Phoenix ${{ github.ref_name }}" \
+            --generate-notes || \
+          gh release upload "${{ github.ref_name }}" \
+            dist_release/*.zip \
+            --clobber
+
+  deploy-pages:
+    if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup C3 Compiler
+        uses: ManuLinares/setup-c3@v1
+        with:
+          version: nightly
+
+      - name: Setup Emscripten
+        uses: emscripten-core/setup-emsdk@v16
+        with:
+          version: latest
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Build Web Target
+        run: c3c build web -Oz -g0 -z "-Oz -s"
+
+      - name: Prepare Web Files
+        run: |
+          mkdir -p public
+          cp build/index.html public/
+          cp build/index.js public/
+          cp build/index.wasm public/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: public/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,6 +1,19 @@
 # Dungeon of the Phoenix
 
-Released June 2025
+<p align="center">
+  <a href="https://manulinares.github.io/phoenix/">
+    <img src="https://github.com/Syn-Nine/c3-mini-games/blob/main/2d-games/phoenix/screenshots/intro.png?raw=true" />
+  </a>
+</p>
+<p align="center">
+  <a href="https://manulinares.github.io/phoenix/">
+    <img src="https://github.com/Syn-Nine/c3-mini-games/blob/main/2d-games/phoenix/screenshots/phoenix-6.gif?raw=true" />
+  </a>
+</p>
+
+[![](https://github.com/Syn-Nine/c3-mini-games/blob/main/2d-games/phoenix/screenshots/shot-7.png?raw=true)](https://manulinares.github.io/phoenix/)
+
+## Released June 2025 ( Original Author https://github.com/Syn-Nine/c3-mini-games/ )
 
 ### Controls:
 - Move: Arrow Keys
@@ -14,19 +27,9 @@ Sounds and music by Syn9.
 Art by Syn9 with some icons from:
 https://dennisbusch-de.itch.io/0xdbs-gasp-8x8-1bpp-rpg-icons
 
-### Screenshots:
-![](https://github.com/Syn-Nine/c3-mini-games/blob/main/2d-games/phoenix/screenshots/intro.png)
 
-![](https://github.com/Syn-Nine/c3-mini-games/blob/main/2d-games/phoenix/screenshots/phoenix-6.gif)
+### Build [c3c compiler](https://c3-lang.org/)
 
-![](https://github.com/Syn-Nine/c3-mini-games/blob/main/2d-games/phoenix/screenshots/shot-7.png)
-
-
-### Notes:
-
-c3 dependencies:
-- raylib v5.5
-
-From the cloned directory type:
-- c3c vendor-fetch raylib55
-- c3c run
+```
+c3c build
+```

@@ -10,6 +10,18 @@
   "targets": {
     "phoenix": {
       "type": "executable"
+    },
+    "web": {
+      "type": "executable",
+      "name": "index.html",
+      "target": "emscripten",
+      "link-args": [
+        //"--preload-file resources/img@resources/img",
+        "-sASYNCIFY",
+        "-sALLOW_MEMORY_GROWTH=1",
+        "-sUSE_WEBGL2=1",
+        "--shell-file src/minshell.html"
+      ]
     }
   },
   "cpu": "generic",
