@@ -1,0 +1,17 @@
+{
+  "langrev": "1",
+  "warnings":  [ "no-unused" ],
+  "dependency-search-paths":  [ "lib" ],
+  "dependencies":  [ "raylib6" ],
+  "authors":  [ "Syn9" ],
+  "version": "1.0.0",
+  "sources":  [ "src/**" ],
+  "output": "build",
+  "targets": {
+    "phoenix": {
+      "type": "executable"
+    }
+  },
+  "cpu": "generic",
+  "opt": "O0"
+}
